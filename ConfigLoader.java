@@ -17,7 +17,7 @@ public class ConfigLoader {
             this.defaultPage = config.getProperty("defaultPage", "index.html"); 
             this.maxThreads = Integer.parseInt(config.getProperty("maxThreads", "10"));
             this.port = Integer.parseInt(config.getProperty("port", "8080")); 
-            this.root = config.getProperty("root", "~/www/lab/html/").replace("~", System.getProperty("user.home")); 
+            this.root = config.getProperty("root", "~//www//lab//html//").replace("~", System.getProperty("user.home")); 
 
         } catch (IOException e) {
             System.err.println("Failed to load configuration: " + e.getMessage());

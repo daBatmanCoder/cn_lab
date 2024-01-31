@@ -6,7 +6,7 @@ import java.nio.file.Paths;
 
 public class ClientHandler implements Runnable {
 
-    
+
     private final Socket socket;
     private final String rootDirectory;
     private final String defaultPage;
@@ -36,7 +36,13 @@ public class ClientHandler implements Runnable {
 
             String method = requestParts[0];
             String uri = requestParts[1].equals("/") ? defaultPage : requestParts[1];
-            System.out.println("Request: " + method + " " + uri	);
+            System.out.println(requestParts[0]);
+            System.out.println(uri);
+            System.out.println(out);
+
+            System.out.println(requestParts[1]);
+            System.out.println(requestParts[2]);
+
             switch (method) {
                 case "GET":
                     handleGetRequest(uri, out);
@@ -86,7 +92,16 @@ public class ClientHandler implements Runnable {
     }
 
     private void handleGetRequest(String uri, OutputStream out) throws IOException {
-        Path filePath = Paths.get(rootDirectory).resolve(uri.substring(1)).normalize();
+
+        // Checking URI
+        if (uri.contains("?")) {
+            uri = uri.substring(uri.indexOf("?") + 1);
+        }
+        System.out.println(uri);
+
+        Path filePath = Paths.get(rootDirectory).resolve(uri.substring(0)).normalize();
+        System.out.println(filePath);
+
         File file = filePath.toFile();
 
         if (!file.exists()) {
