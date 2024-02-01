@@ -21,7 +21,12 @@ public class ResponseUtil {
         byte[] content = Files.readAllBytes(file.toPath());
 
         PrintWriter writer = new PrintWriter(out, true);
-        
+        // Response example: 
+        // HTTP/1.1 200 OK[CRLF] 
+        // content-type: text/html[CRLF] 
+        // content-length: <page/file size>[CRLF] 
+        // [CRLF] 
+        // <content of page/file> 
         writer.println("HTTP/1.1 200 OK");
         writer.println("Content-Type: " + contentType);
         writer.println("Content-Length: " + content.length);

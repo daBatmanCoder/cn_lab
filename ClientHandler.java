@@ -40,8 +40,9 @@ public class ClientHandler implements Runnable {
             System.out.println(uri);
             System.out.println(out);
 
-            System.out.println(requestParts[1]);
-            System.out.println(requestParts[2]);
+            if (uri.contains("?")) {
+                uri = uri.substring(uri.indexOf("?") + 1);
+            }
 
             switch (method) {
                 case "GET":
@@ -94,13 +95,8 @@ public class ClientHandler implements Runnable {
     private void handleGetRequest(String uri, OutputStream out) throws IOException {
 
         // Checking URI
-        if (uri.contains("?")) {
-            uri = uri.substring(uri.indexOf("?") + 1);
-        }
-        System.out.println(uri);
-
         Path filePath = Paths.get(rootDirectory).resolve(uri.substring(0)).normalize();
-        System.out.println(filePath);
+        System.out.println("file path obtain is: " + filePath);
 
         File file = filePath.toFile();
 
@@ -123,7 +119,10 @@ public class ClientHandler implements Runnable {
     }
 
     private void handleHeadRequest(String uri, OutputStream out) throws IOException {
-        Path filePath = Paths.get(rootDirectory).resolve(uri.substring(1)).normalize();
+
+        Path filePath = Paths.get(rootDirectory).resolve(uri.substring(0)).normalize();
+        System.out.println("file path obtain is: " + filePath);
+
         File file = filePath.toFile();
 
         if (!file.exists() || !file.getCanonicalPath().startsWith(new File(rootDirectory).getCanonicalPath())) {
@@ -136,13 +135,13 @@ public class ClientHandler implements Runnable {
     }
 
     private void handlePostRequest(String uri, BufferedReader in, OutputStream out) throws IOException {
-        String response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nPOST request processed.";
+        String response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\rPOST request processed.";
         out.write(response.getBytes());
         out.flush();
     }
 
     private void handleTraceRequest(String requestLine, BufferedReader in, OutputStream out) throws IOException {
-        StringBuilder response = new StringBuilder("HTTP/1.1 200 OK\r\nContent-Type: message/http\r\n\r\n");
+        StringBuilder response = new StringBuilder("HTTP/1.1 200 OK\r\nContent-Type: message/http\r\n");
         response.append(requestLine).append("\r\n");
         String headerLine;
         while ((headerLine = in.readLine()) != null && !headerLine.isEmpty()) {
