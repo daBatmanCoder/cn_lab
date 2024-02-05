@@ -27,7 +27,7 @@ public class ClassicWebServer {
 
         try {
             ServerSocket serverSocket = new ServerSocket(port);
-            System.out.println("Web server is listening on port " + port);
+            System.out.println("Web server is listening on port " + port+" .....................\n");
 
             while (true) {
                 try {

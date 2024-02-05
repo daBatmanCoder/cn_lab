@@ -16,28 +16,30 @@ public class ClientHandler implements Runnable {
         this.defaultPage = defaultPage;
     }
 
+
     @Override
     public void run() {
         try (BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 OutputStream out = socket.getOutputStream()) {
 
             String requestLine = in.readLine();
-            if (requestLine == null || requestLine.isEmpty()) {
+            String[] requestParsed = parseHTTPRequest(requestLine);
+            if (requestParsed == null || requestParsed.length == 0) {
                 Errors.sendErrorResponse(out, 400); // Bad Request
                 return;
             }
             System.out.println("Client request at time: " + java.time.LocalTime.now());
             System.out.println(requestLine);
-            
+
             // System.out.println(requestLine);
-            String[] requestParts = requestLine.split(" ");
-            if (requestParts.length < 3) {
+            // String[] requestParts = requestLine.split(" ");
+            if (requestParsed.length < 3) {
                 Errors.sendErrorResponse(out, 400); // Bad Request
                 return;
             }
 
-            String method = requestParts[0];
-            String uri = requestParts[1].equals("/") ? defaultPage : requestParts[1];
+            String method = requestParsed[0];
+            String uri = requestParsed[1];
             // System.out.println("requestParts[0] "+requestParts[0]);
             // System.out.println("uri "+ uri);
             // System.out.println("out "+out);
@@ -109,6 +111,34 @@ public class ClientHandler implements Runnable {
             default:
                 return "application/octet-stream";
         }
+    }
+
+    public static String[] parseHTTPRequest(String requestLine) {
+        if (requestLine == null || requestLine.isEmpty()) {
+            return null;
+        }
+
+        // System.out.println("Client request at time: " + java.time.LocalTime.now());
+        // System.out.println(requestLine);
+
+        String[] requestParts = requestLine.split(" ");
+        if (requestParts.length < 3) {
+            return null;
+        }
+
+        String method = requestParts[0];
+        String uri = requestParts[1].equals("/") ? "defaultPage" : requestParts[1];
+        String httpVersion = requestParts[2];
+
+        if (uri.contains("?")) {
+            uri = uri.substring(uri.indexOf("?") + 1);
+        }
+        if (uri.charAt(0) == '/') {
+            uri = uri.substring(1);
+        }
+
+        // Return the parsed method, URI, and arguments as an array
+        return new String[]{method, uri, httpVersion};
     }
 
     private void handleGetRequest(String uri, OutputStream out) throws IOException {

@@ -15,6 +15,12 @@ public class Errors {
         PrintWriter writer = new PrintWriter(out, true);
         writer.println(response);
         writer.flush();
+
+        // print the header to the console
+        System.out.println("HTTP/1.1 " + statusCode + " " + statusMessage);
+        System.out.println("Content-Type: text/html");
+        System.out.println();
+        
     }
 
     private static String getStatusMessage(int statusCode) {
