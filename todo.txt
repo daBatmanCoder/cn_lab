@@ -1,0 +1,9 @@
+Networks Lab:
+
+- client keeps disconnecting
+- GET parameters on request x=1..
+- POST responses
+- testing
+- dirs
+- linux
+- connection monitoring
