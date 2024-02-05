@@ -26,7 +26,10 @@ public class ClientHandler implements Runnable {
                 Errors.sendErrorResponse(out, 400); // Bad Request
                 return;
             }
-
+            System.out.println("Client request at time: " + java.time.LocalTime.now());
+            System.out.println(requestLine);
+            
+            // System.out.println(requestLine);
             String[] requestParts = requestLine.split(" ");
             if (requestParts.length < 3) {
                 Errors.sendErrorResponse(out, 400); // Bad Request
@@ -35,9 +38,9 @@ public class ClientHandler implements Runnable {
 
             String method = requestParts[0];
             String uri = requestParts[1].equals("/") ? defaultPage : requestParts[1];
-            System.out.println(requestParts[0]);
-            System.out.println(uri);
-            System.out.println(out);
+            // System.out.println("requestParts[0] "+requestParts[0]);
+            // System.out.println("uri "+ uri);
+            // System.out.println("out "+out);
 
             if (uri.contains("?")) {
                 uri = uri.substring(uri.indexOf("?") + 1);
@@ -111,7 +114,7 @@ public class ClientHandler implements Runnable {
     private void handleGetRequest(String uri, OutputStream out) throws IOException {
 
         Path filePath = Paths.get(rootDirectory).resolve(uri.substring(0)).normalize();
-        System.out.println("file path obtain is: " + filePath);
+        System.out.println("file path obtain is: " + filePath+"\n");
 
         File file = filePath.toFile();
 
@@ -134,7 +137,7 @@ public class ClientHandler implements Runnable {
     private void handleHeadRequest(String uri, OutputStream out) throws IOException {
 
         Path filePath = Paths.get(rootDirectory).resolve(uri.substring(0)).normalize();
-        System.out.println("file path obtain is: " + filePath);
+        System.out.println("file path obtain is: " + filePath+"\n");
 
         File file = filePath.toFile();
 
