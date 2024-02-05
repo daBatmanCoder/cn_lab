@@ -3,6 +3,9 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.concurrent.atomic.AtomicInteger;
+
+
 
 public class ClientHandler implements Runnable {
 
@@ -11,11 +14,13 @@ public class ClientHandler implements Runnable {
     private final String rootDirectory;
     private final String defaultPage;
 
+
     public ClientHandler(Socket socket, String rootDirectory, String defaultPage) {
         this.socket = socket;
         this.rootDirectory = rootDirectory;
         this.defaultPage = defaultPage;
     }
+
 
     @Override
     public void run() {
