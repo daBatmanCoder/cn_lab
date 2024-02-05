@@ -33,7 +33,7 @@ public class ResponseUtil {
         writer.println(); // Blank line between headers and content
         writer.flush();
         // print the header to the console
-        System.out.println("Response TEST");
+        System.out.println("Server Response:");
         System.out.println("HTTP/1.1 200 OK");
         System.out.println("Content-Type: " + contentType);
         System.out.println("Content-Length: " + content.length);
@@ -46,7 +46,6 @@ public class ResponseUtil {
     // No content sent for HEAD request 
     public static void sendHeadResponse(File file, String contentType, OutputStream out) throws IOException {
         PrintWriter writer = new PrintWriter(out, true);
-        System.out.println("Response HEAD");
         writer.println("HTTP/1.1 200 OK");
         writer.println("Content-Type: " + contentType);
         writer.println("Content-Length: " + file.length());
@@ -54,6 +53,7 @@ public class ResponseUtil {
         writer.flush();
 
         // print the header to the console
+        System.out.println("Server Response:");
         System.out.println("HTTP/1.1 200 OK");
         System.out.println("Content-Type: " + contentType);
         System.out.println("Content-Length: " + file.length());

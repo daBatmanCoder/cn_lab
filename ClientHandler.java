@@ -113,7 +113,7 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    public static String[] parseHTTPRequest(String requestLine) {
+    public String[] parseHTTPRequest(String requestLine) {
         if (requestLine == null || requestLine.isEmpty()) {
             return null;
         }
@@ -127,7 +127,7 @@ public class ClientHandler implements Runnable {
         }
 
         String method = requestParts[0];
-        String uri = requestParts[1].equals("/") ? "defaultPage" : requestParts[1];
+        String uri = requestParts[1].equals("/") ? defaultPage : requestParts[1];
         String httpVersion = requestParts[2];
 
         if (uri.contains("?")) {

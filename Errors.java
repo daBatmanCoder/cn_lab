@@ -20,14 +20,14 @@ public class Errors {
         System.out.println("HTTP/1.1 " + statusCode + " " + statusMessage);
         System.out.println("Content-Type: text/html");
         System.out.println();
-        
+
     }
 
     private static String getStatusMessage(int statusCode) {
         switch (statusCode) {
             case 200: return "OK";
             case 404: return "Not Found";
-            case 501: return "Not Implemented111";
+            case 501: return "Not Implemented";
             case 400: return "Bad Request";
             case 500: return "Internal Server Error";
             default: return "Unknown Status Code";
