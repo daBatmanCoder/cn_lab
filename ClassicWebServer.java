@@ -3,8 +3,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.net.SocketException;
 
 public class ClassicWebServer {
 
@@ -14,21 +12,23 @@ public class ClassicWebServer {
     private int maxThreads;
 
     // Constructor for the server
-    public ClassicWebServer(String defaultPage, int maxThreads, int port, String rootDirectory) {
+    public ClassicWebServer(String defaultPage, int maxThreads, int port, String rootDirectory ) {
         this.port = port;
         this.rootDirectory = rootDirectory;
         this.defaultPage = defaultPage;
         this.maxThreads = maxThreads;
     }
 
-
     // Start the server and handle every request coming in
     public void start() {
+
         // Create a thread pool with a fixed number of threads (for our server - 10)
         ExecutorService threadPool = Executors.newFixedThreadPool(maxThreads);
 
         try {
             ServerSocket serverSocket = new ServerSocket(port);
+            System.out.println("Web server is listening on port " + port);
+
             while (true) {
                 try {
                     Socket socket = serverSocket.accept();
@@ -47,8 +47,7 @@ public class ClassicWebServer {
     public static void main(String[] args) {
         // Example usage
         ConfigLoader config = new ConfigLoader("config_file.ini");
-        ClassicWebServer server = new ClassicWebServer(config.getDefaultPage(), config.getMaxThreads(),
-                config.getPort(), config.getRoot());
+        ClassicWebServer server = new ClassicWebServer( config.getDefaultPage(), config.getMaxThreads(), config.getPort(), config.getRoot());
         server.start();
     }
 }

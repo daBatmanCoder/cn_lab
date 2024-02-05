@@ -3,17 +3,12 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.concurrent.atomic.AtomicInteger;
-
-
 
 public class ClientHandler implements Runnable {
-
 
     private final Socket socket;
     private final String rootDirectory;
     private final String defaultPage;
-
 
     public ClientHandler(Socket socket, String rootDirectory, String defaultPage) {
         this.socket = socket;
@@ -21,11 +16,10 @@ public class ClientHandler implements Runnable {
         this.defaultPage = defaultPage;
     }
 
-
     @Override
     public void run() {
         try (BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-             OutputStream out = socket.getOutputStream()) {
+                OutputStream out = socket.getOutputStream()) {
 
             String requestLine = in.readLine();
             if (requestLine == null || requestLine.isEmpty()) {
@@ -48,6 +42,9 @@ public class ClientHandler implements Runnable {
             if (uri.contains("?")) {
                 uri = uri.substring(uri.indexOf("?") + 1);
             }
+            if (uri.charAt(0)=='/') {
+                uri = uri.substring(1);
+            }
 
             switch (method) {
                 case "GET":
@@ -57,37 +54,36 @@ public class ClientHandler implements Runnable {
                     handleHeadRequest(uri, out);
                     break;
                 case "POST":
-                    handlePostRequest(uri, in, out); 
+                    handlePostRequest(uri, in, out);
                     break;
                 case "TRACE":
-                    handleTraceRequest(requestLine, in, out); 
+                    handleTraceRequest(requestLine, in, out);
                     break;
                 default:
                     Errors.sendErrorResponse(out, 501);
-        
 
-            } 
+            }
         } catch (FileNotFoundException e) {
 
+            try {
+
+                Errors.sendErrorResponse(socket.getOutputStream(), 404); // Not Found
+            } catch (IOException ex) {
+
+                ex.printStackTrace();
+            }
+        } catch (IOException e) {
+
+            e.printStackTrace();
+
+            if (!socket.isClosed()) {
                 try {
-
-                    Errors.sendErrorResponse(socket.getOutputStream(), 404); // Not Found
+                    OutputStream out = socket.getOutputStream();
+                    Errors.sendErrorResponse(out, 500); // Send a 500 Internal Server Error response
                 } catch (IOException ex) {
-
-                    ex.printStackTrace();
+                    ex.printStackTrace(); // Log this exception as well, in case sending the error response fails
                 }
-                } catch (IOException e) {
-
-                    e.printStackTrace(); 
-
-                    if (!socket.isClosed()) {
-                        try {
-                            OutputStream out = socket.getOutputStream();
-                            Errors.sendErrorResponse(out, 500); // Send a 500 Internal Server Error response
-                        } catch (IOException ex) {
-                            ex.printStackTrace(); // Log this exception as well, in case sending the error response fails
-                        }
-                    }
+            }
         } finally {
             try {
                 socket.close();
@@ -96,10 +92,24 @@ public class ClientHandler implements Runnable {
             }
         }
     }
+    private String getContentType(String contentType) {
+        switch (contentType) {
+            case "image/jpeg":
+            case "image/png":
+            case "image/gif":
+            case "image/bmp":
+                return "image";
+            case "image/x-icon":
+                return "icon";
+            case "text/html":
+                return "text/html";
+            default:
+                return "application/octet-stream";
+        }
+    }
 
     private void handleGetRequest(String uri, OutputStream out) throws IOException {
 
-        // Checking URI
         Path filePath = Paths.get(rootDirectory).resolve(uri.substring(0)).normalize();
         System.out.println("file path obtain is: " + filePath);
 
@@ -116,11 +126,9 @@ public class ClientHandler implements Runnable {
         }
 
         String contentType = Files.probeContentType(filePath);
-        if (contentType == null) {
-            contentType = "application/octet-stream"; // Default binary content type
-        }
-
+        contentType = getContentType(contentType);
         ResponseUtil.sendSuccessResponse(file, contentType, out);
+        
     }
 
     private void handleHeadRequest(String uri, OutputStream out) throws IOException {
@@ -136,6 +144,7 @@ public class ClientHandler implements Runnable {
         }
 
         String contentType = Files.probeContentType(filePath);
+        contentType = getContentType(contentType);
         ResponseUtil.sendHeadResponse(file, contentType, out);
     }
 

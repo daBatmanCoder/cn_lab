@@ -32,7 +32,7 @@ public class ResponseUtil {
         writer.println("Content-Length: " + content.length);
         writer.println(); // Blank line between headers and content
         writer.flush();
-
+        // write "i am here"
         out.write(content);
         out.flush();
     }
