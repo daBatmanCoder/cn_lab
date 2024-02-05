@@ -1,7 +1,7 @@
 Networks Lab:
 
 - client keeps disconnecting
-- GET parameters on request x=1..
+- GET parameters with /?x=5..
 - POST responses
 - testing
 - dirs

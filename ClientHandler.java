@@ -1,8 +1,11 @@
 import java.io.*;
 import java.net.Socket;
+import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ClientHandler implements Runnable {
 
@@ -15,7 +18,6 @@ public class ClientHandler implements Runnable {
         this.rootDirectory = rootDirectory;
         this.defaultPage = defaultPage;
     }
-
 
     @Override
     public void run() {
@@ -31,8 +33,6 @@ public class ClientHandler implements Runnable {
             System.out.println("Client request at time: " + java.time.LocalTime.now());
             System.out.println(requestLine);
 
-            // System.out.println(requestLine);
-            // String[] requestParts = requestLine.split(" ");
             if (requestParsed.length < 3) {
                 Errors.sendErrorResponse(out, 400); // Bad Request
                 return;
@@ -40,14 +40,14 @@ public class ClientHandler implements Runnable {
 
             String method = requestParsed[0];
             String uri = requestParsed[1];
-            // System.out.println("requestParts[0] "+requestParts[0]);
-            // System.out.println("uri "+ uri);
-            // System.out.println("out "+out);
 
             if (uri.contains("?")) {
-                uri = uri.substring(uri.indexOf("?") + 1);
+                Map<String, String> parameters = getParamMap(uri);
+                System.out.println("parameters: " + parameters);
+                uri = getUriWithoutParams(uri);
             }
-            if (uri.charAt(0)=='/') {
+
+            if (uri.charAt(0) == '/') {
                 uri = uri.substring(1);
             }
 
@@ -97,6 +97,7 @@ public class ClientHandler implements Runnable {
             }
         }
     }
+
     private String getContentType(String contentType) {
         switch (contentType) {
             case "image/jpeg":
@@ -130,15 +131,40 @@ public class ClientHandler implements Runnable {
         String uri = requestParts[1].equals("/") ? defaultPage : requestParts[1];
         String httpVersion = requestParts[2];
 
-        if (uri.contains("?")) {
-            uri = uri.substring(uri.indexOf("?") + 1);
-        }
         if (uri.charAt(0) == '/') {
             uri = uri.substring(1);
         }
 
         // Return the parsed method, URI, and arguments as an array
-        return new String[]{method, uri, httpVersion};
+        return new String[] { method, uri, httpVersion };
+    }
+
+    private Map<String, String> getParamMap(String uri) {
+        Map<String, String> parameters = new HashMap<>();
+        if (uri.contains("?")) {
+            String uri_params = uri.substring(uri.indexOf("?") + 1);
+            String[] pairs = uri_params.split("&");
+            for (String pair : pairs) {
+                String[] keyValue = pair.split("=");
+                if (keyValue.length == 2) {
+                    try {
+                        String key = URLDecoder.decode(keyValue[0], "UTF-8");
+                        String value = URLDecoder.decode(keyValue[1], "UTF-8");
+                        parameters.put(key, value);
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        return parameters;
+    }
+
+    private String getUriWithoutParams(String uri) {
+        if (uri.contains("?")) {
+            uri = uri.substring(0, uri.indexOf("?"));
+        }
+        return uri;
     }
 
     private void handleGetRequest(String uri, OutputStream out) throws IOException {
@@ -161,7 +187,7 @@ public class ClientHandler implements Runnable {
         String contentType = Files.probeContentType(filePath);
         contentType = getContentType(contentType);
         ResponseUtil.sendSuccessResponse(file, contentType, out);
-        
+
     }
 
     private void handleHeadRequest(String uri, OutputStream out) throws IOException {
@@ -181,10 +207,12 @@ public class ClientHandler implements Runnable {
         ResponseUtil.sendHEADResponse(file, contentType, out);
     }
 
-    // private void handlePostRequest(String uri, BufferedReader in, OutputStream out) throws IOException {
-    //     String response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\rPOST request processed.";
-    //     out.write(response.getBytes());
-    //     out.flush();
+    // private void handlePostRequest(String uri, BufferedReader in, OutputStream
+    // out) throws IOException {
+    // String response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\rPOST
+    // request processed.";
+    // out.write(response.getBytes());
+    // out.flush();
     // }
 
     private void handlePostRequest(String uri, BufferedReader in, OutputStream out) throws IOException {
@@ -208,7 +236,7 @@ public class ClientHandler implements Runnable {
         String response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\rPOST request processed.\r\n";
         out.write(response.getBytes());
         ResponseUtil.sendSuccessResponse(file, contentType, out);
-        
+
     }
 
     private void handleTraceRequest(String requestLine, BufferedReader in, OutputStream out) throws IOException {
