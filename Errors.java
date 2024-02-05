@@ -11,7 +11,7 @@ public class Errors {
                           "Content-Type: text/html\r\n" +
                           "\r\n" +
                           "<html><body><h1>" + statusCode + " " + statusMessage + "</h1></body></html>";
-
+ 
         PrintWriter writer = new PrintWriter(out, true);
         writer.println(response);
         writer.flush();
@@ -19,10 +19,12 @@ public class Errors {
 
     private static String getStatusMessage(int statusCode) {
         switch (statusCode) {
+            case 200: return "OK";
             case 404: return "Not Found";
+            case 501: return "Not Implemented111";
+            case 400: return "Bad Request";
             case 500: return "Internal Server Error";
-            // Add more cases as needed
-            default: return "Not Implemented";
+            default: return "Unknown Status Code";
         }
     }
 }
