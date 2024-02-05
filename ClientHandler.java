@@ -144,7 +144,7 @@ public class ClientHandler implements Runnable {
     private void handleGetRequest(String uri, OutputStream out) throws IOException {
 
         Path filePath = Paths.get(rootDirectory).resolve(uri.substring(0)).normalize();
-        System.out.println("file path obtain is: " + filePath+"\n");
+        // System.out.println("file path obtain is: " + filePath+"\n");
 
         File file = filePath.toFile();
 
@@ -167,7 +167,7 @@ public class ClientHandler implements Runnable {
     private void handleHeadRequest(String uri, OutputStream out) throws IOException {
 
         Path filePath = Paths.get(rootDirectory).resolve(uri.substring(0)).normalize();
-        System.out.println("file path obtain is: " + filePath+"\n");
+        // System.out.println("file path obtain is: " + filePath+"\n");
 
         File file = filePath.toFile();
 
@@ -178,13 +178,37 @@ public class ClientHandler implements Runnable {
 
         String contentType = Files.probeContentType(filePath);
         contentType = getContentType(contentType);
-        ResponseUtil.sendHeadResponse(file, contentType, out);
+        ResponseUtil.sendHEADResponse(file, contentType, out);
     }
 
+    // private void handlePostRequest(String uri, BufferedReader in, OutputStream out) throws IOException {
+    //     String response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\rPOST request processed.";
+    //     out.write(response.getBytes());
+    //     out.flush();
+    // }
+
     private void handlePostRequest(String uri, BufferedReader in, OutputStream out) throws IOException {
-        String response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\rPOST request processed.";
+        Path filePath = Paths.get(rootDirectory).resolve(uri.substring(0)).normalize();
+        // System.out.println("file path obtain is: " + filePath+"\n");
+
+        File file = filePath.toFile();
+
+        if (!file.exists()) {
+            Errors.sendErrorResponse(out, 404); // Not Found
+            return;
+        }
+
+        if (!file.getCanonicalPath().startsWith(new File(rootDirectory).getCanonicalPath())) {
+            Errors.sendErrorResponse(out, 403); // Forbidden
+            return;
+        }
+
+        String contentType = Files.probeContentType(filePath);
+        contentType = getContentType(contentType);
+        String response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\rPOST request processed.\r\n";
         out.write(response.getBytes());
-        out.flush();
+        ResponseUtil.sendSuccessResponse(file, contentType, out);
+        
     }
 
     private void handleTraceRequest(String requestLine, BufferedReader in, OutputStream out) throws IOException {

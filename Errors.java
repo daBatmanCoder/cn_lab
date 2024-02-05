@@ -17,6 +17,7 @@ public class Errors {
         writer.flush();
 
         // print the header to the console
+        System.out.println("Server Response at time: " + java.time.LocalTime.now());
         System.out.println("HTTP/1.1 " + statusCode + " " + statusMessage);
         System.out.println("Content-Type: text/html");
         System.out.println();
