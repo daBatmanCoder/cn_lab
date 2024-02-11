@@ -36,7 +36,7 @@ public class ClientHandler implements Runnable {
             String method = requestParsed[0];
             String uri = requestParsed[1];
             String httpVersion = requestParsed[2];
-            System.out.println("method: " + method + " uri: " + uri + " httpVersion: " + httpVersion);
+            // System.out.println("method: " + method + " uri: " + uri + " httpVersion: " + httpVersion);
 
             if (uri.contains("?")) {
                 Map<String, String> parameters = getParamMap(uri);
@@ -116,11 +116,12 @@ public class ClientHandler implements Runnable {
         String method = requestParts[0];
         String uri = requestParts[1];
         String httpVersion = requestParts[2];
+        // if (!httpVersion.equals("HTTP/1.1")) { return null; }
 
         if (uri.charAt(0) == '/') {
             uri = uri.substring(1);
         }
-        // uri = requestParts[1].equals("/") ? defaultPage : requestParts[1];
+
         if (uri.isEmpty()) {
             uri = defaultPage;
         }
@@ -130,6 +131,15 @@ public class ClientHandler implements Runnable {
 
         // Return the parsed method, URI (with params if exists), and arguments as an array
         return new String[] { method, uri, httpVersion };
+    }
+
+    private String getUriWithoutParams(String uri) {
+        if (uri.contains("?")) {
+            // System.out.println("uri with params: " + uri);
+            uri = uri.substring(0, uri.indexOf("?"));
+            // System.out.println("uri without params: " + uri);
+        }
+        return uri;
     }
 
     private Map<String, String> getParamMap(String uri) {
@@ -153,14 +163,7 @@ public class ClientHandler implements Runnable {
         return parameters;
     }
 
-    private String getUriWithoutParams(String uri) {
-        if (uri.contains("?")) {
-            // System.out.println("uri with params: " + uri);
-            uri = uri.substring(0, uri.indexOf("?"));
-            // System.out.println("uri without params: " + uri);
-        }
-        return uri;
-    }
+
 
     private void handleGetRequest(String uri, OutputStream out) throws IOException {
 
