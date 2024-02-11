@@ -23,15 +23,25 @@ public class ClientHandler implements Runnable {
     public void run() {
         try (BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 OutputStream out = socket.getOutputStream()) {
-
+            
             String requestLine = in.readLine();
+            System.out.println("\nClient request at time: " + java.time.LocalTime.now());
+            System.out.println(requestLine);
+            
+            
+            // // add 10 seconds delay
+            // try {
+            //     Thread.sleep(5000);
+            // } catch (InterruptedException e) {
+            //     e.printStackTrace();
+            // }
+
+
             String[] requestParsed = parseHTTPRequest(requestLine);
             if (requestParsed == null) {
                 Errors.sendErrorResponse(out, 400); // Bad Request
                 return;
             }
-            System.out.println("Client request at time: " + java.time.LocalTime.now());
-            System.out.println(requestLine);
 
             String method = requestParsed[0];
             String uri = requestParsed[1];
@@ -41,7 +51,7 @@ public class ClientHandler implements Runnable {
             if (uri.contains("?")) {
                 Map<String, String> parameters = getParamMap(uri);
                 System.out.println("parameters: " + parameters);
-                uri = getUriWithoutParams(uri);
+                uri = uri.substring(0, uri.indexOf("?"));
             }
 
             switch (method) {
@@ -129,18 +139,14 @@ public class ClientHandler implements Runnable {
             uri = defaultPage + uri;
         }
 
+        // if (requestLine.contains("chunked: yes")) {
+        //     System.out.println("Chunked transfer encoding is not supported.");
+        //     return null;
+        // }
         // Return the parsed method, URI (with params if exists), and arguments as an array
         return new String[] { method, uri, httpVersion };
     }
 
-    private String getUriWithoutParams(String uri) {
-        if (uri.contains("?")) {
-            // System.out.println("uri with params: " + uri);
-            uri = uri.substring(0, uri.indexOf("?"));
-            // System.out.println("uri without params: " + uri);
-        }
-        return uri;
-    }
 
     private Map<String, String> getParamMap(String uri) {
         Map<String, String> parameters = new HashMap<>();
@@ -223,8 +229,8 @@ public class ClientHandler implements Runnable {
 
         String contentType = Files.probeContentType(filePath);
         contentType = getContentType(contentType);
-        String response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\rPOST request processed.\r\n";
-        out.write(response.getBytes());
+        // String response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\rPOST request processed.\r\n";
+        // out.write(response.getBytes());
         ResponseUtil.sendSuccessResponse(file, contentType, out);
     }
 

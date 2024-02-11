@@ -1,9 +1,18 @@
 Networks Lab:
 
-- client keeps disconnecting
-- GET parameters with /?x=5..
-- POST responses
-- testing
-- dirs
-- linux
-- connection monitoring
+
+Jonathan
+- POST responses (params_info.html)
+- extras
+- linux and directories
+
+
+Hadar
+- testing (crashing, filetypes, dir access, post response, max threadsV)
+- chunked
+# - GET parameters with /?x=5..
+
+- trace
+- 
+- connection monitoring (conn&disco)
+# - client keeps disconnecting
