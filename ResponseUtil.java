@@ -32,13 +32,11 @@ public class ResponseUtil {
         writer.println("Content-Length: " + content.length);
         writer.println(); // Blank line between headers and content
         writer.flush();
-        // print the header to the console
         System.out.println("Server Response at time: " + java.time.LocalTime.now());
         System.out.println("HTTP/1.1 200 OK");
         System.out.println("Content-Type: " + contentType);
         System.out.println("Content-Length: " + content.length);
         System.out.println();
-        // write "i am here to the console"
         out.write(content);
         out.flush();
     }

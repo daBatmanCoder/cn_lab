@@ -26,29 +26,22 @@ public class ClientHandler implements Runnable {
 
             String requestLine = in.readLine();
             String[] requestParsed = parseHTTPRequest(requestLine);
-            if (requestParsed == null || requestParsed.length == 0) {
+            if (requestParsed == null) {
                 Errors.sendErrorResponse(out, 400); // Bad Request
                 return;
             }
             System.out.println("Client request at time: " + java.time.LocalTime.now());
             System.out.println(requestLine);
 
-            if (requestParsed.length < 3) {
-                Errors.sendErrorResponse(out, 400); // Bad Request
-                return;
-            }
-
             String method = requestParsed[0];
             String uri = requestParsed[1];
+            String httpVersion = requestParsed[2];
+            System.out.println("method: " + method + " uri: " + uri + " httpVersion: " + httpVersion);
 
             if (uri.contains("?")) {
                 Map<String, String> parameters = getParamMap(uri);
                 System.out.println("parameters: " + parameters);
                 uri = getUriWithoutParams(uri);
-            }
-
-            if (uri.charAt(0) == '/') {
-                uri = uri.substring(1);
             }
 
             switch (method) {
@@ -115,27 +108,27 @@ public class ClientHandler implements Runnable {
     }
 
     public String[] parseHTTPRequest(String requestLine) {
-        if (requestLine == null || requestLine.isEmpty()) {
-            return null;
-        }
-
-        // System.out.println("Client request at time: " + java.time.LocalTime.now());
-        // System.out.println(requestLine);
+        if (requestLine == null || requestLine.isEmpty()) { return null; }
 
         String[] requestParts = requestLine.split(" ");
-        if (requestParts.length < 3) {
-            return null;
-        }
+        if (requestParts.length < 3) { return null; }
 
         String method = requestParts[0];
-        String uri = requestParts[1].equals("/") ? defaultPage : requestParts[1];
+        String uri = requestParts[1];
         String httpVersion = requestParts[2];
 
         if (uri.charAt(0) == '/') {
             uri = uri.substring(1);
         }
+        // uri = requestParts[1].equals("/") ? defaultPage : requestParts[1];
+        if (uri.isEmpty()) {
+            uri = defaultPage;
+        }
+        if (uri.contains("?") && !uri.contains(defaultPage)) {
+            uri = defaultPage + uri;
+        }
 
-        // Return the parsed method, URI, and arguments as an array
+        // Return the parsed method, URI (with params if exists), and arguments as an array
         return new String[] { method, uri, httpVersion };
     }
 
@@ -162,7 +155,9 @@ public class ClientHandler implements Runnable {
 
     private String getUriWithoutParams(String uri) {
         if (uri.contains("?")) {
+            // System.out.println("uri with params: " + uri);
             uri = uri.substring(0, uri.indexOf("?"));
+            // System.out.println("uri without params: " + uri);
         }
         return uri;
     }
@@ -207,14 +202,6 @@ public class ClientHandler implements Runnable {
         ResponseUtil.sendHEADResponse(file, contentType, out);
     }
 
-    // private void handlePostRequest(String uri, BufferedReader in, OutputStream
-    // out) throws IOException {
-    // String response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\rPOST
-    // request processed.";
-    // out.write(response.getBytes());
-    // out.flush();
-    // }
-
     private void handlePostRequest(String uri, BufferedReader in, OutputStream out) throws IOException {
         Path filePath = Paths.get(rootDirectory).resolve(uri.substring(0)).normalize();
         // System.out.println("file path obtain is: " + filePath+"\n");
@@ -236,7 +223,6 @@ public class ClientHandler implements Runnable {
         String response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\rPOST request processed.\r\n";
         out.write(response.getBytes());
         ResponseUtil.sendSuccessResponse(file, contentType, out);
-
     }
 
     private void handleTraceRequest(String requestLine, BufferedReader in, OutputStream out) throws IOException {
