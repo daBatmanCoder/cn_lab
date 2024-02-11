@@ -46,7 +46,7 @@ public class ClientHandler implements Runnable {
             String method = requestParsed[0];
             String uri = requestParsed[1];
             String httpVersion = requestParsed[2];
-            // System.out.println("method: " + method + " uri: " + uri + " httpVersion: " + httpVersion);
+            System.out.println("method: " + method + " uri: " + uri + " httpVersion: " + httpVersion);
 
             if (uri.contains("?")) {
                 Map<String, String> parameters = getParamMap(uri);
@@ -143,6 +143,8 @@ public class ClientHandler implements Runnable {
         //     System.out.println("Chunked transfer encoding is not supported.");
         //     return null;
         // }
+
+
         // Return the parsed method, URI (with params if exists), and arguments as an array
         return new String[] { method, uri, httpVersion };
     }
@@ -169,25 +171,26 @@ public class ClientHandler implements Runnable {
         return parameters;
     }
 
+    private Path getSanitizedPathString(String uri, OutputStream out) throws IOException {
+        // Path filePath = Paths.get(rootDirectory).resolve(uri.substring(0)).normalize();
+        Path filePath = Paths.get(rootDirectory).resolve(uri.substring(0));
+        File file = filePath.toFile();
+        if (!file.getCanonicalPath().startsWith(new File(rootDirectory).getCanonicalPath())) {
+            Errors.sendErrorResponse(out, 403); // Forbidden
+            return null;
+        }
+        if (!file.exists()) {
+            Errors.sendErrorResponse(out, 404); // Not Found
+            return null;
+        }
+        return filePath;
+    }
 
 
     private void handleGetRequest(String uri, OutputStream out) throws IOException {
-
-        Path filePath = Paths.get(rootDirectory).resolve(uri.substring(0)).normalize();
-        // System.out.println("file path obtain is: " + filePath+"\n");
-
+        Path filePath = getSanitizedPathString(uri, out);
+        if (filePath == null) { return; }
         File file = filePath.toFile();
-
-        if (!file.exists()) {
-            Errors.sendErrorResponse(out, 404); // Not Found
-            return;
-        }
-
-        if (!file.getCanonicalPath().startsWith(new File(rootDirectory).getCanonicalPath())) {
-            Errors.sendErrorResponse(out, 403); // Forbidden
-            return;
-        }
-
         String contentType = Files.probeContentType(filePath);
         contentType = getContentType(contentType);
         ResponseUtil.sendSuccessResponse(file, contentType, out);
@@ -195,38 +198,19 @@ public class ClientHandler implements Runnable {
     }
 
     private void handleHeadRequest(String uri, OutputStream out) throws IOException {
-
-        Path filePath = Paths.get(rootDirectory).resolve(uri.substring(0)).normalize();
-        // System.out.println("file path obtain is: " + filePath+"\n");
-
+        Path filePath = getSanitizedPathString(uri, out);
+        if (filePath == null) { return; }
         File file = filePath.toFile();
-
-        if (!file.exists() || !file.getCanonicalPath().startsWith(new File(rootDirectory).getCanonicalPath())) {
-            Errors.sendErrorResponse(out, 404); // Not Found or Forbidden
-            return;
-        }
-
         String contentType = Files.probeContentType(filePath);
         contentType = getContentType(contentType);
         ResponseUtil.sendHEADResponse(file, contentType, out);
     }
 
     private void handlePostRequest(String uri, BufferedReader in, OutputStream out) throws IOException {
-        Path filePath = Paths.get(rootDirectory).resolve(uri.substring(0)).normalize();
-        // System.out.println("file path obtain is: " + filePath+"\n");
 
+        Path filePath = getSanitizedPathString(uri, out);
+        if (filePath == null) { return; }
         File file = filePath.toFile();
-
-        if (!file.exists()) {
-            Errors.sendErrorResponse(out, 404); // Not Found
-            return;
-        }
-
-        if (!file.getCanonicalPath().startsWith(new File(rootDirectory).getCanonicalPath())) {
-            Errors.sendErrorResponse(out, 403); // Forbidden
-            return;
-        }
-
         String contentType = Files.probeContentType(filePath);
         contentType = getContentType(contentType);
         // String response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\rPOST request processed.\r\n";
