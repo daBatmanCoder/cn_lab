@@ -8,11 +8,11 @@ Jonathan
 
 
 Hadar
-- testing (crashing, filetypes, dir access, post response, max threadsV)
+- testing (crashing, filetypesV, dir accessV, post response, max threadsV)
 - chunked
 # - GET parameters with /?x=5..
 
-- trace
-- headers parameters
+- trace?
+- headers parameters handling
 - connection monitoring (conn&disco)
 # - client keeps disconnecting

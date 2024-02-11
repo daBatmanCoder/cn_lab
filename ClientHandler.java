@@ -218,14 +218,27 @@ public class ClientHandler implements Runnable {
         ResponseUtil.sendSuccessResponse(file, contentType, out);
     }
 
+    // private void handleTraceRequest(String requestLine, BufferedReader in, OutputStream out) throws IOException {
+    //     StringBuilder response = new StringBuilder("HTTP/1.1 200 OK\r\nContent-Type: message/http\r\n");
+    //     response.append(requestLine).append("\r\n");
+    //     String headerLine;
+    //     while ((headerLine = in.readLine()) != null && !headerLine.isEmpty()) {
+    //         response.append(headerLine).append("\r\n");
+    //     }
+    //     out.write(response.toString().getBytes());
+    //     out.flush();
+    // }
+
     private void handleTraceRequest(String requestLine, BufferedReader in, OutputStream out) throws IOException {
-        StringBuilder response = new StringBuilder("HTTP/1.1 200 OK\r\nContent-Type: message/http\r\n");
-        response.append(requestLine).append("\r\n");
+        PrintWriter writer = new PrintWriter(out, true);
+        writer.println("HTTP/1.1 200 OK");
+        writer.println("Content-Type: message/http");
+        writer.println();
+        writer.println(requestLine);
         String headerLine;
         while ((headerLine = in.readLine()) != null && !headerLine.isEmpty()) {
-            response.append(headerLine).append("\r\n");
+            writer.println(headerLine);
         }
-        out.write(response.toString().getBytes());
-        out.flush();
+        writer.flush();
     }
 }
