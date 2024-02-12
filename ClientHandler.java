@@ -55,8 +55,9 @@ public class ClientHandler implements Runnable {
 
             String method = requestParsed[0];
             String uri = requestParsed[1];
+            String sanitize_uri = sanitizeUri(uri);
             String httpVersion = requestParsed[2];
-            System.out.println("method: " + method + " uri: " + uri + " httpVersion: " + httpVersion);
+            System.out.println("method: " + method + " uri: " + sanitize_uri + " httpVersion: " + httpVersion);
 
             if (uri.contains("?")) {
                 Map<String, String> parameters = getParamMap(uri);
@@ -110,6 +111,16 @@ public class ClientHandler implements Runnable {
                 e.printStackTrace(); // Log exception
             }
         }
+    }
+
+    public String sanitizeUri(String uri) {
+        // Pattern to match extraneous characters before the intended path
+        String pattern = "~/+\\.*/+";
+    
+        // Replace matched patterns with a single "/"
+        String sanitizedUri = uri.replaceAll(pattern, "/");
+    
+        return sanitizedUri;
     }
 
     private String getContentType(String contentType) {
@@ -200,6 +211,7 @@ public class ClientHandler implements Runnable {
 
     public void handleGetRequest(String uri, OutputStream out) throws IOException {
         Path filePath = getSanitizedPathString(uri, out);
+        System.out.println("File Path: " + filePath);
         if (filePath == null) { return; }
         File file = filePath.toFile();
         String contentType = Files.probeContentType(filePath);
