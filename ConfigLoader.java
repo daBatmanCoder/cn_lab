@@ -2,6 +2,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 
+/**
+ * The ConfigLoader class is responsible for loading the server configuration from a file and
+ * providing access to the configuration properties.
+ */
+
 public class ConfigLoader { 
     private int port;
     private String root;

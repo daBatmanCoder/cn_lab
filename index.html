@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 
 <html>
-<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
-<link rel="icon" href="C:/Users/haesh/OneDrive/Documents/School/networks/Excersices/cn_lab/images/logo.png" type="image/png">
+<link rel="icon" type="image/x-icon" href="./images/favicon.ico">
+<!-- <link rel="icon" href="C:/Users/haesh/OneDrive/Documents/School/networks/Excersices/cn_lab/images/logo.png" type="image/png"> -->
 <head>
     <title>Computer Networks 2023: Exercise 1</title>
     <style>
@@ -71,16 +71,12 @@
     </form>
  </div>
 
- <form method="post">
+ <form action="http://localhost:8080/params_info.html" method="post">
         <label for="userName">Your name:</label><br>
         <textarea id="userName" name="name" rows="1" cols="20"></textarea><br>
         <input type="checkbox" id="subscribeCheckbox" name="subscribe" value="subscribed_yes">
         <label for="subscribeCheckbox">Subscribe to newsletter</label><br>
         <input type="submit" value="Submit">
-    <script>
-        function showMessage() {
-            alert('Form Submitted!');
-        }
-    </script>
+ </form>
 </body>
 </html>

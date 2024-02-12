@@ -4,6 +4,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 
+// The ResponseUtil class provides methods for sending HTTP responses to the client.
 public class ResponseUtil {
     
      // Request line:

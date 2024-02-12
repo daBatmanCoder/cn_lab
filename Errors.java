@@ -2,6 +2,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 
+/**
+ * The Errors class provides a method for sending an HTTP error response to the client.
+ */
 public class Errors {
 
     public static void sendErrorResponse(OutputStream out, int statusCode) throws IOException {

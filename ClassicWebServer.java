@@ -1,8 +1,17 @@
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+
+/**
+ * The ClassicWebServer class represents a simple web server that handles incoming client requests.
+ * It listens on a specified port, accepts client connections, and delegates the handling of each
+ * client connection to a separate thread from a thread pool. The server is configured with a root
+ * directory, default page, maximum number of threads, and port number.
+ */
 
 public class ClassicWebServer {
 
@@ -27,8 +36,8 @@ public class ClassicWebServer {
 
         try {
             ServerSocket serverSocket = new ServerSocket(port);
-            System.out.println("Web server is listening on port " + port+" .....................\n");
-
+            System.out.println("Web server is listening on port " + port+ "...\n");
+ 
             while (true) {
                 try {
                     Socket socket = serverSocket.accept();
@@ -45,8 +54,14 @@ public class ClassicWebServer {
     }
 
     public static void main(String[] args) {
-        ConfigLoader config = new ConfigLoader("config_file.ini");
-        ClassicWebServer server = new ClassicWebServer( config.getDefaultPage(), config.getMaxThreads(), config.getPort(), config.getRoot());
-        server.start();
+        try{
+            ConfigLoader config = new ConfigLoader("config_file.ini");
+            ClassicWebServer server = new ClassicWebServer( config.getDefaultPage(), config.getMaxThreads(), config.getPort(), config.getRoot());
+            server.start();
+        }
+        catch(Exception e){
+            System.out.println("Error: " + e.getMessage());
+        }
     }
 }
+
