@@ -64,6 +64,7 @@ public class ClientHandler implements Runnable {
                 uri = uri.substring(0, uri.indexOf("?"));
             }
 
+
             switch (method) {
                 case "GET":
                     handleGetRequest(uri, out);
@@ -181,8 +182,8 @@ public class ClientHandler implements Runnable {
         return parameters;
     }
 
+    // Sanitize the path string to prevent directory traversal attacks
     private Path getSanitizedPathString(String uri, OutputStream out) throws IOException {
-        // Path filePath = Paths.get(rootDirectory).resolve(uri.substring(0)).normalize();
         Path filePath = Paths.get(rootDirectory).resolve(uri.substring(0));
         File file = filePath.toFile();
         if (!file.getCanonicalPath().startsWith(new File(rootDirectory).getCanonicalPath())) {
@@ -217,14 +218,37 @@ public class ClientHandler implements Runnable {
     }
 
     public void handlePostRequest(String uri, BufferedReader in, OutputStream out) throws IOException {
-        // Assuming content length is manageable and headers have already been read
-        StringBuilder payload = new StringBuilder();
-        while(in.ready()){
-            payload.append((char) in.read());
+        
+
+        int contentLength = -1;
+
+        // Read and process all headers
+        String headerLine;
+        while (!(headerLine = in.readLine()).isEmpty()) {
+            System.out.println(headerLine); 
+            if (headerLine.startsWith("Content-Length:")) {
+                contentLength = Integer.parseInt(headerLine.substring("Content-Length:".length()).trim());
+            }
         }
-        String formData = payload.toString();
-        Map<String, String> params = parseFormData(formData);
-    
+
+        if (contentLength == -1) {
+            Errors.sendErrorResponse(out, 411); // Erro for Length
+            return;
+        }
+
+        // Read the body of the request based on Content-Length
+        char[] bodyChars = new char[contentLength];
+        int bytesRead = in.read(bodyChars, 0, contentLength);
+        if (bytesRead != contentLength) {
+            Errors.sendErrorResponse(out, 400); // Bad Request
+            return;
+        }
+        String body = new String(bodyChars);
+
+        System.out.println("Body: " + body); // Checking for debugging
+
+        Map<String, String> params = parseFormData(body);
+        
         // Generate dynamic HTML based on params
         String responseHtml = generateDynamicHtml(params);
     
