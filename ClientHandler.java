@@ -60,7 +60,7 @@ public class ClientHandler implements Runnable {
             System.out.println("method: " + method + " uri: " + sanitize_uri + " httpVersion: " + httpVersion);
 
             if (uri.contains("?")) {
-                Map<String, String> parameters = getParamMap(uri);
+                Map<String, String> parameters = getParamMap(sanitize_uri);
                 System.out.println("parameters: " + parameters);
                 uri = uri.substring(0, uri.indexOf("?"));
             }
@@ -68,13 +68,13 @@ public class ClientHandler implements Runnable {
 
             switch (method) {
                 case "GET":
-                    handleGetRequest(uri, out);
+                    handleGetRequest(sanitize_uri, out);
                     break;
                 case "HEAD":
-                    handleHeadRequest(uri, out);
+                    handleHeadRequest(sanitize_uri, out);
                     break;
                 case "POST":
-                    handlePostRequest(uri, in, out);
+                    handlePostRequest(sanitize_uri, in, out);
                     break;
                 case "TRACE":
                     handleTraceRequest(requestLine, in, out);
