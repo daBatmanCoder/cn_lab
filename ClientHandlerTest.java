@@ -1,7 +1,11 @@
 import java.io.*;
 import java.net.*;
 import java.nio.file.*;
-import java.util.*;
+
+/**
+ * This class tests the ClientHandler class.
+ * It tests the handleGetRequest, handleHeadRequest, handlePostRequest, and handleTraceRequest methods.
+ */
 
 public class ClientHandlerTest {
 
