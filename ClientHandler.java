@@ -231,48 +231,51 @@ public class ClientHandler implements Runnable {
 
     public void handlePostRequest(String uri, BufferedReader in, OutputStream out) throws IOException {
         
+        if (uri.equals("params_info.html")){
 
-        int contentLength = -1;
+            System.out.println("Handling POST request for URI: " + uri);
+            int contentLength = -1;
 
-        // Read and process all headers
-        String headerLine;
-        while (!(headerLine = in.readLine()).isEmpty()) {
-            System.out.println(headerLine); 
-            if (headerLine.startsWith("Content-Length:")) {
-                contentLength = Integer.parseInt(headerLine.substring("Content-Length:".length()).trim());
+            // Read and process all headers
+            String headerLine;
+            while (!(headerLine = in.readLine()).isEmpty()) {
+                System.out.println(headerLine); 
+                if (headerLine.startsWith("Content-Length:")) {
+                    contentLength = Integer.parseInt(headerLine.substring("Content-Length:".length()).trim());
+                }
             }
-        }
 
-        if (contentLength == -1) {
-            Errors.sendErrorResponse(out, 411); // Erro for Length
-            return;
-        }
+            if (contentLength == -1) {
+                Errors.sendErrorResponse(out, 411); // Erro for Length
+                return;
+            }
 
-        // Read the body of the request based on Content-Length
-        char[] bodyChars = new char[contentLength];
-        int bytesRead = in.read(bodyChars, 0, contentLength);
-        if (bytesRead != contentLength) {
-            Errors.sendErrorResponse(out, 400); // Bad Request
-            return;
-        }
-        String body = new String(bodyChars);
+            // Read the body of the request based on Content-Length
+            char[] bodyChars = new char[contentLength];
+            int bytesRead = in.read(bodyChars, 0, contentLength);
+            if (bytesRead != contentLength) {
+                Errors.sendErrorResponse(out, 400); // Bad Request
+                return;
+            }
+            String body = new String(bodyChars);
 
-        System.out.println("Body: " + body); // Checking for debugging
-
-        Map<String, String> params = parseFormData(body);
+            Map<String, String> params = parseFormData(body);
+            
+            // Generate dynamic HTML based on params
+            String responseHtml = generateDynamicHtml(params);
         
-        // Generate dynamic HTML based on params
-        String responseHtml = generateDynamicHtml(params);
-    
-        // Send response
-        PrintWriter writer = new PrintWriter(out, true);
-        writer.println("HTTP/1.1 200 OK");
-        writer.println("Content-Type: text/html");
-        writer.println("Content-Length: " + responseHtml.getBytes().length);
-        writer.println();
-        writer.print(responseHtml);
-        writer.flush();
-    }
+            // Send response
+            PrintWriter writer = new PrintWriter(out, true);
+            writer.println("HTTP/1.1 200 OK");
+            writer.println("Content-Type: text/html");
+            writer.println("Content-Length: " + responseHtml.getBytes().length);
+            writer.println();
+            writer.print(responseHtml);
+            writer.flush();
+        } else {
+            Errors.sendErrorResponse(out, 404); // Not Found
+       }
+}
 
     private Map<String, String> parseFormData(String formData) {
         Map<String, String> params = new HashMap<>();
