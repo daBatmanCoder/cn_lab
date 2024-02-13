@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<link rel="icon" href="/images/logo.ico" type="image/png">
+<head>
+    <title>Computer Networks 2023: Exercise 1</title>
+    <style>
+	body {
+            text-align: center; /* Center align everything in the body */
+        }
+
+	.container {
+            display: inline-block;
+            text-align: left; /* Align text to the left inside the container */
+        }
+
+        @keyframes moveTitle {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(500px); }
+        }
+
+        .moving-title {
+            color: blue;
+            animation: moveTitle 3s infinite;
+        }
+
+        .fixed-title {
+            color: red;
+        }
+
+        .centered-images {
+	    justify-content: center;
+            display: flex;
+        }
+
+        .centered-images img {
+            margin: 0 10px;
+            width: 100px;  /* Set image width */
+            height: 100px; /* Set image height */
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="moving-title">Computer Networks 2023: Exercise 1</h1>
+    <h1 class="fixed-title">Jonathan Kandel</h2>
+    <div class="centered-images">
+	<img src="images/image1.jpg" alt="Image n.1">
+        <img src="images/image2.jpg" alt="Image n.2">
+    </div>
+    <a href="https://moodle.runi.ac.il/2024/course/view.php?id=2401572">Course Website</a><br>
+    <a href="https://www.youtube.com/">Favorite Website</a>
+    <hr>
+    <form action="http://localhost:8080/params_info.html" method="post">
+
+        <label for="sender">Sender</label><br>
+        <input type="text" id="sender" name="sender"><br>
+
+        <label for="receiver">Receiver</label><br>
+        <input type="text" id="receiver" name="receiver"><br>
+
+        <label for="subject">Subject</label><br>
+        <input type="text" id="subject" name="subject"><br>
+
+        <label for="message">Message</label><br>
+        <textarea id="message" name="message"></textarea><br>
+
+        <input type="submit" value="Submit Now">
+    </form>
+ </div>
+
+ <form action="http://localhost:8080/params_info.html" method="post">
+    <label for="userName">Your name:</label><br>
+    <textarea id="userName" name="name" rows="1" cols="20"></textarea><br>
+    <input type="hidden" name="subscribe" value="subscribed_No">
+    <input type="checkbox" id="subscribeCheckbox" name="subscribe" value="subscribed_yes" >
+    <label for="subscribeCheckbox">Subscribe to newsletter</label><br>
+    <input type="submit" value="Submit">
+</form>
+
+</body>
+</html>

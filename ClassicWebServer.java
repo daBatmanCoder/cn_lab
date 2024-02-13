@@ -56,7 +56,7 @@ public class ClassicWebServer {
 
     public static void main(String[] args) {
         try{
-            ConfigLoader config = new ConfigLoader("config_file.ini");
+            ConfigLoader config = new ConfigLoader("config.ini");
             ClassicWebServer server = new ClassicWebServer( config.getDefaultPage(), config.getMaxThreads(), config.getPort(), config.getRoot());
             server.start();
         }

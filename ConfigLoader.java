@@ -49,7 +49,7 @@ public class ConfigLoader {
   
     // Test the class
     public static void main(String[] args) {
-        ConfigLoader config = new ConfigLoader("config_file.ini");
+        ConfigLoader config = new ConfigLoader("config.ini");
         System.out.println("Default Page: " + config.getDefaultPage());
         System.out.println("Max Threads: " + config.getMaxThreads());
         System.out.println("Port: " + config.getPort());
