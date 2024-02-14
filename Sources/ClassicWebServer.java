@@ -35,7 +35,7 @@ public class ClassicWebServer {
         // So when a the number of threads are too busy ( max threads are reached) 
         //the server will queue the requests (up to 10 requests)
         ExecutorService threadPool = Executors.newFixedThreadPool(maxThreads);
-
+        
         try {
             try (ServerSocket serverSocket = new ServerSocket(port)) {
                 System.out.println("Web server is listening on port " + port+ "...\n");
@@ -43,7 +43,7 @@ public class ClassicWebServer {
                     try {
                         Socket socket = serverSocket.accept();
                         // Handle the client connection using a separate thread from the thread pool
-                        threadPool.execute(new ClientHandler(socket, rootDirectory, defaultPage));
+                        threadPool.execute(new ClientHandler(socket, rootDirectory, defaultPage, false));
                     } catch (IOException e) {
                         System.out.println("Server exception: " + e.getMessage());
                     }

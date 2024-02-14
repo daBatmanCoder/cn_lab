@@ -25,7 +25,7 @@ public class ClientHandlerTest {
             String defaultPage = "index.html";
             Socket socket = new Socket();
             OutputStream outputStream = new ByteArrayOutputStream();
-            ClientHandler clientHandler = new ClientHandler(socket, rootDirectory, defaultPage);
+            ClientHandler clientHandler = new ClientHandler(socket, rootDirectory, defaultPage, false);
 
             // Test case 1: Valid GET request
             String uri1 = "file.txt";
@@ -52,7 +52,7 @@ public class ClientHandlerTest {
             String defaultPage = "index.html";
             Socket socket = new Socket();
             OutputStream outputStream = new ByteArrayOutputStream();
-            ClientHandler clientHandler = new ClientHandler(socket, rootDirectory, defaultPage);
+            ClientHandler clientHandler = new ClientHandler(socket, rootDirectory, defaultPage, false);
 
             // Test case 1: Valid HEAD request
             String uri1 = "file.txt";
@@ -80,7 +80,7 @@ public class ClientHandlerTest {
             Socket socket = new Socket();
             Map<String, String> params = new HashMap<>();
             OutputStream outputStream = new ByteArrayOutputStream();
-            ClientHandler clientHandler = new ClientHandler(socket, rootDirectory, defaultPage);
+            ClientHandler clientHandler = new ClientHandler(socket, rootDirectory, defaultPage, false);
 
             // Test case 1: Valid POST request
             String uri1 = "file.txt";
@@ -105,7 +105,7 @@ public class ClientHandlerTest {
         try {
             Socket socket = new Socket();
             OutputStream outputStream = new ByteArrayOutputStream();
-            ClientHandler clientHandler = new ClientHandler(socket, "", "");
+            ClientHandler clientHandler = new ClientHandler(socket, "", "", false);
 
             // Test case 1: Valid TRACE request
             String requestLine1 = "TRACE / HTTP/1.1";
