@@ -141,10 +141,10 @@ public class ClientHandler implements Runnable {
 
     public String[] parseHTTPRequest(String requestLine) {
         if (requestLine == null || requestLine.isEmpty()) { return null; }
-
+        
         String[] requestParts = requestLine.split(" ");
         if (requestParts.length < 3) { return null; }
-
+        
         String method = requestParts[0];
         String uri = requestParts[1];
         String httpVersion = requestParts[2];

@@ -32,12 +32,13 @@ public class ClassicWebServer {
     public void start() {
 
         // Create a thread pool with a fixed number of threads (for our server - 10)
+        // So when a the number of threads are too busy ( max threads are reached) 
+        //the server will queue the requests (up to 10 requests)
         ExecutorService threadPool = Executors.newFixedThreadPool(maxThreads);
 
         try {
             try (ServerSocket serverSocket = new ServerSocket(port)) {
                 System.out.println("Web server is listening on port " + port+ "...\n");
- 
                 while (true) {
                     try {
                         Socket socket = serverSocket.accept();
