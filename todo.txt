@@ -13,6 +13,6 @@ Hadar
 # - GET parameters with /?x=5..
 
 - trace?
-- headers parameters handling
+- headers parameters handling (while in.readline)
 - connection monitoring (conn&disco)
 # - client keeps disconnecting

@@ -6,6 +6,16 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.nio.charset.StandardCharsets;
+
+
+/*
+The ClientHandler class in your Java code is a server-side component that handles client requests.
+It implements the Runnable interface, allowing it to be used in a multithreaded environment.
+The class supports handling of GET, HEAD, POST, and TRACE HTTP methods.
+It reads client requests, processes them based on the HTTP method, and sends back appropriate responses.
+The class also includes error handling for file not found and input/output exceptions.
+ */
 
 public class ClientHandler implements Runnable {
 
@@ -25,16 +35,11 @@ public class ClientHandler implements Runnable {
                 OutputStream out = socket.getOutputStream()) {
             
             String requestLine = in.readLine();
-            System.out.println("\nClient request at time: " + java.time.LocalTime.now());
+            if (requestLine == null) {
+                return;
+            }
             System.out.println(requestLine);
-            
-            
-            // // add 10 seconds delay
-            // try {
-            //     Thread.sleep(5000);
-            // } catch (InterruptedException e) {
-            //     e.printStackTrace();
-            // }
+            System.out.println("\nClient request at time: " + java.time.LocalTime.now());
 
 
             String[] requestParsed = parseHTTPRequest(requestLine);
@@ -42,16 +47,19 @@ public class ClientHandler implements Runnable {
                 Errors.sendErrorResponse(out, 400); // Bad Request
                 return;
             }
-
+            Map<String, String> parameters;
             String method = requestParsed[0];
             String uri = requestParsed[1];
+            String sanitize_uri = sanitizeUri(uri);
             String httpVersion = requestParsed[2];
-            System.out.println("method: " + method + " uri: " + uri + " httpVersion: " + httpVersion);
+            // System.out.println("method: " + method + " uri: " + sanitize_uri + " httpVersion: " + httpVersion);
 
             if (uri.contains("?")) {
-                Map<String, String> parameters = getParamMap(uri);
+                parameters = getParamMap(sanitize_uri);
                 System.out.println("parameters: " + parameters);
                 uri = uri.substring(0, uri.indexOf("?"));
+            } else {
+                parameters = new HashMap<>();
             }
 
             switch (method) {
@@ -62,7 +70,7 @@ public class ClientHandler implements Runnable {
                     handleHeadRequest(uri, out);
                     break;
                 case "POST":
-                    handlePostRequest(uri, in, out);
+                    handlePostRequest(uri, parameters, in, out);
                     break;
                 case "TRACE":
                     handleTraceRequest(requestLine, in, out);
@@ -101,7 +109,17 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    private String getContentType(String contentType) {
+    public String sanitizeUri(String uri) { // Pattern matching
+        // Pattern to match extraneous characters before the intended path
+        String pattern = "/+\\.*/+";
+    
+        // Replace matched patterns with a single "/"
+        String sanitizedUri = uri.replaceAll(pattern, "/");
+    
+        return sanitizedUri;
+    }
+
+    private String getContentType(String contentType) { // Content type
         switch (contentType) {
             case "image/jpeg":
             case "image/png":
@@ -119,10 +137,10 @@ public class ClientHandler implements Runnable {
 
     public String[] parseHTTPRequest(String requestLine) {
         if (requestLine == null || requestLine.isEmpty()) { return null; }
-
+        
         String[] requestParts = requestLine.split(" ");
         if (requestParts.length < 3) { return null; }
-
+        
         String method = requestParts[0];
         String uri = requestParts[1];
         String httpVersion = requestParts[2];
@@ -134,9 +152,6 @@ public class ClientHandler implements Runnable {
 
         if (uri.isEmpty()) {
             uri = defaultPage;
-        }
-        if (uri.contains("?") && !uri.contains(defaultPage)) {
-            uri = defaultPage + uri;
         }
 
         // if (requestLine.contains("chunked: yes")) {
@@ -171,8 +186,8 @@ public class ClientHandler implements Runnable {
         return parameters;
     }
 
+    // Sanitize the path string to prevent directory traversal attacks
     private Path getSanitizedPathString(String uri, OutputStream out) throws IOException {
-        // Path filePath = Paths.get(rootDirectory).resolve(uri.substring(0)).normalize();
         Path filePath = Paths.get(rootDirectory).resolve(uri.substring(0));
         File file = filePath.toFile();
         if (!file.getCanonicalPath().startsWith(new File(rootDirectory).getCanonicalPath())) {
@@ -187,8 +202,9 @@ public class ClientHandler implements Runnable {
     }
 
 
-    private void handleGetRequest(String uri, OutputStream out) throws IOException {
+    public void handleGetRequest(String uri, OutputStream out) throws IOException {
         Path filePath = getSanitizedPathString(uri, out);
+        System.out.println("File Path: " + filePath);
         if (filePath == null) { return; }
         File file = filePath.toFile();
         String contentType = Files.probeContentType(filePath);
@@ -197,39 +213,100 @@ public class ClientHandler implements Runnable {
 
     }
 
-    private void handleHeadRequest(String uri, OutputStream out) throws IOException {
-        Path filePath = getSanitizedPathString(uri, out);
+    public void handleHeadRequest(String uri, OutputStream out) throws IOException {
+        System.out.println("Handling HEAD request for URI: " + uri);
+        String path = uri.split("\\?")[0];  // Use regex "\\?" to split since "?" is a special character in regex
+
+        Path filePath = getSanitizedPathString(path, out);
         if (filePath == null) { return; }
+
         File file = filePath.toFile();
+        if (!file.exists() || !file.isFile()) {
+            // Handle the case where the file does not exist or is not a file (e.g., send a 404 response)
+            Errors.sendErrorResponse(out, 404);
+            return;
+        }
         String contentType = Files.probeContentType(filePath);
         contentType = getContentType(contentType);
         ResponseUtil.sendHEADResponse(file, contentType, out);
     }
 
-    private void handlePostRequest(String uri, BufferedReader in, OutputStream out) throws IOException {
+    public void handlePostRequest(String uri,Map<String, String> params_in_head ,BufferedReader in, OutputStream out) throws IOException {
+        
+        if (uri.equals("params_info.html")){
 
-        Path filePath = getSanitizedPathString(uri, out);
-        if (filePath == null) { return; }
-        File file = filePath.toFile();
-        String contentType = Files.probeContentType(filePath);
-        contentType = getContentType(contentType);
-        // String response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\rPOST request processed.\r\n";
-        // out.write(response.getBytes());
-        ResponseUtil.sendSuccessResponse(file, contentType, out);
+            System.out.println("Handling POST request for URI: " + uri);
+            int contentLength = -1;
+
+            // Read and process all headers
+            String headerLine;
+            while (!(headerLine = in.readLine()).isEmpty()) {
+                System.out.println(headerLine); 
+                if (headerLine.startsWith("Content-Length:")) {
+                    contentLength = Integer.parseInt(headerLine.substring("Content-Length:".length()).trim());
+                }
+            }
+
+            if (contentLength == -1) {
+                Errors.sendErrorResponse(out, 411); // Error for Length
+                return;
+            }
+
+            // Read the body of the request based on Content-Length
+            char[] bodyChars = new char[contentLength];
+            int bytesRead = in.read(bodyChars, 0, contentLength);
+            if (bytesRead != contentLength) {
+                Errors.sendErrorResponse(out, 400); // Bad Request
+                return;
+            }
+            String body = new String(bodyChars);
+            System.out.println("Body: " + body);
+            
+            Map<String, String> params = parseFormData(body);
+            params.putAll(params_in_head);
+            
+            // Generate dynamic HTML based on params
+            String responseHtml = generateDynamicHtml(params);
+        
+            // Send response
+            PrintWriter writer = new PrintWriter(out, true);
+            writer.println("HTTP/1.1 200 OK");
+            writer.println("Content-Type: text/html");
+            writer.println("Content-Length: " + responseHtml.getBytes().length);
+            writer.println();
+            writer.println(responseHtml);
+            writer.flush();
+        } else {
+            Errors.sendErrorResponse(out, 404); // Not Found
+       }
+}
+
+    private Map<String, String> parseFormData(String formData) {
+        Map<String, String> params = new HashMap<>();
+        String[] pairs = formData.split("&");
+        for (String pair : pairs) {
+            String[] keyValue = pair.split("=");
+            if (keyValue.length == 2) {
+                String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);
+                String value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
+                params.put(key, value);
+            }
+        }
+        return params;
     }
 
-    // private void handleTraceRequest(String requestLine, BufferedReader in, OutputStream out) throws IOException {
-    //     StringBuilder response = new StringBuilder("HTTP/1.1 200 OK\r\nContent-Type: message/http\r\n");
-    //     response.append(requestLine).append("\r\n");
-    //     String headerLine;
-    //     while ((headerLine = in.readLine()) != null && !headerLine.isEmpty()) {
-    //         response.append(headerLine).append("\r\n");
-    //     }
-    //     out.write(response.toString().getBytes());
-    //     out.flush();
-    // }
+    private String generateDynamicHtml(Map<String, String> params) {
+        StringBuilder htmlBuilder = new StringBuilder("<!DOCTYPE html><html><body>");
+        htmlBuilder.append("<h2>Form Submission Details</h2>");
+        for (Map.Entry<String, String> entry : params.entrySet()) {
+            htmlBuilder.append("<p>").append(entry.getKey()).append(": ").append(entry.getValue()).append("</p>");
+        }
+        htmlBuilder.append("</body></html>");
+        return htmlBuilder.toString();
+    }
 
-    private void handleTraceRequest(String requestLine, BufferedReader in, OutputStream out) throws IOException {
+
+    public void handleTraceRequest(String requestLine, BufferedReader in, OutputStream out) throws IOException {
         PrintWriter writer = new PrintWriter(out, true);
         writer.println("HTTP/1.1 200 OK");
         writer.println("Content-Type: message/http");

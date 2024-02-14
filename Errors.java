@@ -2,6 +2,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 
+/**
+ * The Errors class provides a method for sending an HTTP error response to the client.
+ */
 public class Errors {
 
     public static void sendErrorResponse(OutputStream out, int statusCode) throws IOException {
@@ -27,11 +30,11 @@ public class Errors {
     private static String getStatusMessage(int statusCode) {
         switch (statusCode) {
             case 200: return "OK";
-            case 404: return "Not Found";
-            case 403: return "Forbidden";
-            case 501: return "Not Implemented";
             case 400: return "Bad Request";
+            case 403: return "Forbidden";
+            case 404: return "Not Found";
             case 500: return "Internal Server Error";
+            case 501: return "Not Implemented";
             default: return "Unknown Status Code";
         }
     }

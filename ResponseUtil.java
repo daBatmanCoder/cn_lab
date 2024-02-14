@@ -4,6 +4,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 
+// The ResponseUtil class provides methods for sending HTTP responses to the client.
 public class ResponseUtil {
     
      // Request line:
@@ -50,14 +51,15 @@ public class ResponseUtil {
         // content-length: <page/file size>[CRLF] 
         // [CRLF] 
         writer.println("HTTP/1.1 200 OK");
+        writer.println("Date: " + java.time.LocalTime.now());
         writer.println("Content-Type: " + contentType);
         writer.println("Content-Length: " + file.length());
         writer.println(); // No body sent for HEAD request
         writer.flush();
 
         // print the header to the console
-        System.out.println("Server Response at time: " + java.time.LocalTime.now());
         System.out.println("HTTP/1.1 200 OK");
+        System.out.println("Server Response at time: " + java.time.LocalTime.now());
         System.out.println("Content-Type: " + contentType);
         System.out.println("Content-Length: " + file.length());
         System.out.println();

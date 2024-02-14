@@ -1,8 +1,6 @@
 <!DOCTYPE html>
-
 <html>
-<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
-<link rel="icon" href="C:/Users/haesh/OneDrive/Documents/School/networks/Excersices/cn_lab/images/logo.png" type="image/png">
+<link rel="icon" href="/images/logo.ico" type="image/png">
 <head>
     <title>Computer Networks 2023: Exercise 1</title>
     <style>
@@ -45,16 +43,16 @@
 <body>
   <div class="container">
     <h1 class="moving-title">Computer Networks 2023: Exercise 1</h1>
-    <h1 class="fixed-title">Jonathan Kandel</h2>
+    <h1 class="fixed-title">Jonathan Kandel & Hadar Eshed</h2>
     <div class="centered-images">
 	<img src="images/image1.jpg" alt="Image n.1">
-	<img src="images/image2.jpg" alt="Image n.2">
-    
+        <img src="images/image2.jpg" alt="Image n.2">
     </div>
     <a href="https://moodle.runi.ac.il/2024/course/view.php?id=2401572">Course Website</a><br>
     <a href="https://www.youtube.com/">Favorite Website</a>
     <hr>
-    <form onsubmit="return showMessage();" method="post">
+    <form action="params_info.html" method="post">
+
         <label for="sender">Sender</label><br>
         <input type="text" id="sender" name="sender"><br>
 
@@ -71,16 +69,14 @@
     </form>
  </div>
 
- <form method="post">
-        <label for="userName">Your name:</label><br>
-        <textarea id="userName" name="name" rows="1" cols="20"></textarea><br>
-        <input type="checkbox" id="subscribeCheckbox" name="subscribe" value="subscribed_yes">
-        <label for="subscribeCheckbox">Subscribe to newsletter</label><br>
-        <input type="submit" value="Submit">
-    <script>
-        function showMessage() {
-            alert('Form Submitted!');
-        }
-    </script>
+ <form action="params_info.html" method="post">
+    <label for="userName">Your name:</label><br>
+    <textarea id="userName" name="name" rows="1" cols="20"></textarea><br>
+    <input type="hidden" name="subscribe" value="subscribed_No">
+    <input type="checkbox" id="subscribeCheckbox" name="subscribe" value="subscribed_yes" >
+    <label for="subscribeCheckbox">Subscribe to newsletter</label><br>
+    <input type="submit" value="Submit">
+</form>
+
 </body>
 </html>
