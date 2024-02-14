@@ -39,7 +39,7 @@ public class ClientHandler implements Runnable {
             System.out.println(requestLine);
             
             
-            // // add 10 seconds delay
+            // // add 10 seconds delay - TESTING
             // try {
             //     Thread.sleep(5000);
             // } catch (InterruptedException e) {
@@ -221,9 +221,18 @@ public class ClientHandler implements Runnable {
     }
 
     public void handleHeadRequest(String uri, OutputStream out) throws IOException {
-        Path filePath = getSanitizedPathString(uri, out);
+        System.out.println("Handling HEAD request for URI: " + uri);
+        String path = uri.split("\\?")[0];  // Use regex "\\?" to split since "?" is a special character in regex
+
+        Path filePath = getSanitizedPathString(path, out);
         if (filePath == null) { return; }
+
         File file = filePath.toFile();
+        if (!file.exists() || !file.isFile()) {
+            // Handle the case where the file does not exist or is not a file (e.g., send a 404 response)
+            Errors.sendErrorResponse(out, 404);
+            return;
+        }
         String contentType = Files.probeContentType(filePath);
         contentType = getContentType(contentType);
         ResponseUtil.sendHEADResponse(file, contentType, out);
