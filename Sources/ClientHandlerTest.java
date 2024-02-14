@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.*;
 import java.nio.file.*;
+import java.util.*;
 
 /**
  * This class tests the ClientHandler class.
@@ -77,19 +78,20 @@ public class ClientHandlerTest {
             String rootDirectory = tempFile.getParent().toString();
             String defaultPage = "index.html";
             Socket socket = new Socket();
+            Map<String, String> params = new HashMap<>();
             OutputStream outputStream = new ByteArrayOutputStream();
             ClientHandler clientHandler = new ClientHandler(socket, rootDirectory, defaultPage);
 
             // Test case 1: Valid POST request
             String uri1 = "file.txt";
             BufferedReader in = new BufferedReader(new StringReader("POST data"));
-            clientHandler.handlePostRequest(uri1, in, outputStream);
+            clientHandler.handlePostRequest(uri1, params, in, outputStream);
             // Assert the response
 
             // Test case 2: Invalid URI
             String uri2 = "nonexistent.txt";
             BufferedReader in2 = new BufferedReader(new StringReader("POST data"));
-            clientHandler.handlePostRequest(uri2, in2, outputStream);
+            clientHandler.handlePostRequest(uri2,params, in2, outputStream);
             // Assert the response
 
             // Clean up the temporary file

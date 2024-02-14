@@ -35,9 +35,12 @@ public class ClientHandler implements Runnable {
                 OutputStream out = socket.getOutputStream()) {
             
             String requestLine = in.readLine();
-            System.out.println("\nClient request at time: " + java.time.LocalTime.now());
+            if (requestLine == null) {
+                return;
+            }
             System.out.println(requestLine);
-            
+            System.out.println("\nClient request at time: " + java.time.LocalTime.now());
+
             
             // // add 10 seconds delay - TESTING
             // try {
@@ -52,7 +55,7 @@ public class ClientHandler implements Runnable {
                 Errors.sendErrorResponse(out, 400); // Bad Request
                 return;
             }
-
+            Map<String, String> parameters;
             String method = requestParsed[0];
             String uri = requestParsed[1];
             String sanitize_uri = sanitizeUri(uri);
@@ -60,21 +63,22 @@ public class ClientHandler implements Runnable {
             System.out.println("method: " + method + " uri: " + sanitize_uri + " httpVersion: " + httpVersion);
 
             if (uri.contains("?")) {
-                Map<String, String> parameters = getParamMap(sanitize_uri);
+                parameters = getParamMap(sanitize_uri);
                 System.out.println("parameters: " + parameters);
                 uri = uri.substring(0, uri.indexOf("?"));
+            } else {
+                parameters = new HashMap<>();
             }
-
 
             switch (method) {
                 case "GET":
-                    handleGetRequest(sanitize_uri, out);
+                    handleGetRequest(uri, out);
                     break;
                 case "HEAD":
-                    handleHeadRequest(sanitize_uri, out);
+                    handleHeadRequest(uri, out);
                     break;
                 case "POST":
-                    handlePostRequest(sanitize_uri, in, out);
+                    handlePostRequest(uri, parameters, in, out);
                     break;
                 case "TRACE":
                     handleTraceRequest(requestLine, in, out);
@@ -113,9 +117,9 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    public String sanitizeUri(String uri) {
+    public String sanitizeUri(String uri) { // Pattern matching
         // Pattern to match extraneous characters before the intended path
-        String pattern = "~/+\\.*/+";
+        String pattern = "/+\\.*/+";
     
         // Replace matched patterns with a single "/"
         String sanitizedUri = uri.replaceAll(pattern, "/");
@@ -123,7 +127,7 @@ public class ClientHandler implements Runnable {
         return sanitizedUri;
     }
 
-    private String getContentType(String contentType) {
+    private String getContentType(String contentType) { // Content type
         switch (contentType) {
             case "image/jpeg":
             case "image/png":
@@ -156,9 +160,6 @@ public class ClientHandler implements Runnable {
 
         if (uri.isEmpty()) {
             uri = defaultPage;
-        }
-        if (uri.contains("?") && !uri.contains(defaultPage)) {
-            uri = defaultPage + uri;
         }
 
         // if (requestLine.contains("chunked: yes")) {
@@ -238,7 +239,7 @@ public class ClientHandler implements Runnable {
         ResponseUtil.sendHEADResponse(file, contentType, out);
     }
 
-    public void handlePostRequest(String uri, BufferedReader in, OutputStream out) throws IOException {
+    public void handlePostRequest(String uri,Map<String, String> params_in_head ,BufferedReader in, OutputStream out) throws IOException {
         
         if (uri.equals("params_info.html")){
 
@@ -267,8 +268,10 @@ public class ClientHandler implements Runnable {
                 return;
             }
             String body = new String(bodyChars);
-
+            System.out.println("Body: " + body);
+            
             Map<String, String> params = parseFormData(body);
+            params.putAll(params_in_head);
             
             // Generate dynamic HTML based on params
             String responseHtml = generateDynamicHtml(params);
@@ -279,7 +282,7 @@ public class ClientHandler implements Runnable {
             writer.println("Content-Type: text/html");
             writer.println("Content-Length: " + responseHtml.getBytes().length);
             writer.println();
-            writer.print(responseHtml);
+            writer.println(responseHtml);
             writer.flush();
         } else {
             Errors.sendErrorResponse(out, 404); // Not Found
