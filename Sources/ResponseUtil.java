@@ -6,7 +6,6 @@ import java.nio.file.Files;
 
 // The ResponseUtil class provides methods for sending HTTP responses to the client.
 public class ResponseUtil {
-    
      // Request line:
     //      GET /index.html HTTP/1.1
 
@@ -18,7 +17,7 @@ public class ResponseUtil {
     // Body: 
     //      <html><body><h1>404 Not Found</h1></body></html>
 
-    public static void sendSuccessResponse(File file, String contentType, OutputStream out) throws IOException {
+    public static void sendSuccessResponse(File file, String contentType, OutputStream out, boolean chunked) throws IOException {
         byte[] content = Files.readAllBytes(file.toPath());
 
         PrintWriter writer = new PrintWriter(out, true);
@@ -38,7 +37,18 @@ public class ResponseUtil {
         System.out.println("Content-Type: " + contentType);
         System.out.println("Content-Length: " + content.length);
         System.out.println();
-        out.write(content);
+        if(!chunked){ out.write(content); }
+        else{
+            // System.out.println("Chunked response");
+            int chunkLength = 1000;
+            // int chunks = (int) Math.ceil((double)content.length / chunkLength);
+            for(int i = 0; i < content.length; i += chunkLength){
+                int sizeInChunkI = (i + chunkLength > content.length) ? content.length - i : chunkLength;
+                out.write(content, i, sizeInChunkI);
+                // System.out.println("Chunk " + i + " sent");
+            }
+            // out.write(content);
+        }
         out.flush();
     }
 
