@@ -1,1 +1,1 @@
-javac ClassicWebServer.java
+javac Sources/*.java

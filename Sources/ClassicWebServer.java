@@ -53,7 +53,6 @@ public class ClassicWebServer {
             System.exit(1);
         }
     }
-
     public static void main(String[] args) {
         try{
             ConfigLoader config = new ConfigLoader("config.ini");

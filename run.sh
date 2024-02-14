@@ -1,1 +1,1 @@
-java ClassicWebServer
+java -cp Sources ClassicWebServer
