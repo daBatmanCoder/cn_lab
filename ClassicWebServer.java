@@ -43,7 +43,7 @@ public class ClassicWebServer {
                     try {
                         Socket socket = serverSocket.accept();
                         // Handle the client connection using a separate thread from the thread pool
-                        threadPool.execute(new ClientHandler(socket, rootDirectory, defaultPage));
+                        threadPool.execute(new ClientHandler(socket, rootDirectory, defaultPage, false));
                     } catch (IOException e) {
                         System.out.println("Server exception: " + e.getMessage());
                     }

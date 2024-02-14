@@ -22,11 +22,14 @@ public class ClientHandler implements Runnable {
     private final Socket socket;
     private final String rootDirectory;
     private final String defaultPage;
+    private boolean chunked;
 
-    public ClientHandler(Socket socket, String rootDirectory, String defaultPage) {
+
+    public ClientHandler(Socket socket, String rootDirectory, String defaultPage, boolean chunked) {
         this.socket = socket;
         this.rootDirectory = rootDirectory;
         this.defaultPage = defaultPage;
+        this.chunked = chunked;
     }
 
     @Override
@@ -34,14 +37,28 @@ public class ClientHandler implements Runnable {
         try (BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 OutputStream out = socket.getOutputStream()) {
             
-            String requestLine = in.readLine();
-            if (requestLine == null) {
+            String requestLine;
+            StringBuilder requestBuilder = new StringBuilder();
+
+            while ((requestLine = in.readLine()) != null && !requestLine.isEmpty()) {
+                requestBuilder.append(requestLine).append("\n");
+                if (requestLine.contains("transfer-encoding: chunked")) {
+                    chunked = true;
+                }
+            }
+
+            String clientRequest = requestBuilder.toString();
+            if (clientRequest.isEmpty()) {
                 return;
             }
-            System.out.println(requestLine);
+
+            // Request with headers
+            System.out.println(clientRequest);
+            // First line of the request only
+            requestLine = clientRequest.split("\n")[0];
             System.out.println("\nClient request at time: " + java.time.LocalTime.now());
 
-
+            
             String[] requestParsed = parseHTTPRequest(requestLine);
             if (requestParsed == null) {
                 Errors.sendErrorResponse(out, 400); // Bad Request
@@ -61,7 +78,6 @@ public class ClientHandler implements Runnable {
             } else {
                 parameters = new HashMap<>();
             }
-
             switch (method) {
                 case "GET":
                     handleGetRequest(uri, out);
@@ -77,21 +93,15 @@ public class ClientHandler implements Runnable {
                     break;
                 default:
                     Errors.sendErrorResponse(out, 501);
-
             }
         } catch (FileNotFoundException e) {
-
             try {
-
                 Errors.sendErrorResponse(socket.getOutputStream(), 404); // Not Found
             } catch (IOException ex) {
-
                 ex.printStackTrace();
             }
         } catch (IOException e) {
-
             e.printStackTrace();
-
             if (!socket.isClosed()) {
                 try {
                     OutputStream out = socket.getOutputStream();
@@ -209,7 +219,7 @@ public class ClientHandler implements Runnable {
         File file = filePath.toFile();
         String contentType = Files.probeContentType(filePath);
         contentType = getContentType(contentType);
-        ResponseUtil.sendSuccessResponse(file, contentType, out);
+        ResponseUtil.sendSuccessResponse(file, contentType, out, chunked);
 
     }
 
@@ -277,7 +287,14 @@ public class ClientHandler implements Runnable {
             writer.println(responseHtml);
             writer.flush();
         } else {
-            Errors.sendErrorResponse(out, 404); // Not Found
+            Path filePath = getSanitizedPathString(uri, out);
+            if (filePath == null) { return; }
+            File file = filePath.toFile();
+            String contentType = Files.probeContentType(filePath);
+            contentType = getContentType(contentType);
+            // String response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\rPOST request processed.\r\n";
+            // out.write(response.getBytes());
+            ResponseUtil.sendSuccessResponse(file, contentType, out, chunked);
        }
 }
 

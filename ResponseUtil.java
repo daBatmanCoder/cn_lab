@@ -18,7 +18,7 @@ public class ResponseUtil {
     // Body: 
     //      <html><body><h1>404 Not Found</h1></body></html>
 
-    public static void sendSuccessResponse(File file, String contentType, OutputStream out) throws IOException {
+    public static void sendSuccessResponse(File file, String contentType, OutputStream out, boolean chunked) throws IOException {
         byte[] content = Files.readAllBytes(file.toPath());
 
         PrintWriter writer = new PrintWriter(out, true);
@@ -38,7 +38,15 @@ public class ResponseUtil {
         System.out.println("Content-Type: " + contentType);
         System.out.println("Content-Length: " + content.length);
         System.out.println();
-        out.write(content);
+        if(!chunked){ out.write(content); }
+        else{
+            int chunkLength = 300;
+            int chunks = (int) Math.ceil((double)content.length / chunkLength);
+            for(int i = 0; i < chunks; i ++){
+                int sizeInChunkI = (i + chunkLength > content.length) ? content.length - i : chunkLength;
+                out.write(content, i, sizeInChunkI);
+            }
+        }
         out.flush();
     }
 
