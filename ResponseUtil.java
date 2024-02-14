@@ -6,7 +6,6 @@ import java.nio.file.Files;
 
 // The ResponseUtil class provides methods for sending HTTP responses to the client.
 public class ResponseUtil {
-    
      // Request line:
     //      GET /index.html HTTP/1.1
 
@@ -40,12 +39,15 @@ public class ResponseUtil {
         System.out.println();
         if(!chunked){ out.write(content); }
         else{
-            int chunkLength = 300;
-            int chunks = (int) Math.ceil((double)content.length / chunkLength);
-            for(int i = 0; i < chunks; i ++){
+            // System.out.println("Chunked response");
+            int chunkLength = 1000;
+            // int chunks = (int) Math.ceil((double)content.length / chunkLength);
+            for(int i = 0; i < content.length; i += chunkLength){
                 int sizeInChunkI = (i + chunkLength > content.length) ? content.length - i : chunkLength;
                 out.write(content, i, sizeInChunkI);
+                // System.out.println("Chunk " + i + " sent");
             }
+            // out.write(content);
         }
         out.flush();
     }
